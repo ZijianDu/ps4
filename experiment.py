@@ -82,9 +82,9 @@ def part_1a():
                                           'ShiftR5U5.png'), 0) / 255.
 
     # Optional: smooth the images if LK doesn't work well on raw images
-    k_size = 0  # TODO: Select a kernel size
-    k_type = ""  # TODO: Select a kernel type
-    sigma = 0  # TODO: Select a sigma value if you are using a gaussian kernel
+    k_size = 5
+    k_type = "gaussian"
+    sigma = 3
     u, v = ps4.optic_flow_lk(shift_0, shift_r2, k_size, k_type, sigma)
 
     # Flow image
@@ -94,9 +94,9 @@ def part_1a():
     # Now let's try with ShiftR5U5. You may want to try smoothing the
     # input images first.
 
-    k_size = 0 # TODO: Select a kernel size
-    k_type = ""  # TODO: Select a kernel type
-    sigma = 0 # TODO: Select a sigma value if you are using a gaussian kernel
+    k_size = 5
+    k_type = "gaussian"
+    sigma = 3
     u, v = ps4.optic_flow_lk(shift_0, shift_r5_u5, k_size, k_type, sigma)
 
     # Flow image
@@ -127,14 +127,40 @@ def part_1b():
     """
     shift_0 = cv2.imread(os.path.join(input_dir, 'TestSeq',
                                       'Shift0.png'), 0) / 255.
+
     shift_r10 = cv2.imread(os.path.join(input_dir, 'TestSeq',
                                         'ShiftR10.png'), 0) / 255.
+
+    k_size = 3
+    k_type = "gaussian"
+    sigma = 1
+    u, v = ps4.optic_flow_lk(shift_0, shift_r10, k_size, k_type, sigma)
+
+    # Flow image
+    u_v = quiver(u, v, scale=3, stride=10)
+    cv2.imwrite(os.path.join(output_dir, "ps4-1-b-1.png"), u_v)
     shift_r20 = cv2.imread(os.path.join(input_dir, 'TestSeq',
                                         'ShiftR20.png'), 0) / 255.
+    k_size = 5
+    k_type = "gaussian"
+    sigma = 3
+    u, v = ps4.optic_flow_lk(shift_0, shift_r20, k_size, k_type, sigma)
+
+    # Flow image
+    u_v = quiver(u, v, scale=3, stride=10)
+    cv2.imwrite(os.path.join(output_dir, "ps4-1-b-2.png"), u_v)
     shift_r40 = cv2.imread(os.path.join(input_dir, 'TestSeq',
                                         'ShiftR40.png'), 0) / 255.
+    k_size = 10
+    k_type = "gaussian"
+    sigma = 6
+    u, v = ps4.optic_flow_lk(shift_0, shift_r40, k_size, k_type, sigma)
 
-    raise NotImplementedError
+    # Flow image
+    u_v = quiver(u, v, scale=3, stride=10)
+    cv2.imwrite(os.path.join(output_dir, "ps4-1-b-3.png"), u_v)
+
+
 
 
 def part_2():
@@ -315,8 +341,9 @@ def part_6():
 
 
 if __name__ == '__main__':
-    part_1a()
+    #part_1a()
     part_1b()
+    '''
     part_2()
     part_3a_1()
     part_3a_2()
@@ -325,3 +352,4 @@ if __name__ == '__main__':
     part_5a()
     part_5b()
     part_6()
+    '''

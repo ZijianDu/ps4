@@ -10,7 +10,6 @@ import ps4
 
 INPUT_DIR = "input_images/test_images/"
 
-
 class Part1(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -69,7 +68,7 @@ class Part1(unittest.TestCase):
 
             self.assertTrue(check_v, error_msg)
 
-'''
+
 class Part2(unittest.TestCase):
 
     def test_reduce(self):
@@ -80,20 +79,20 @@ class Part2(unittest.TestCase):
 
         for i in range(3):
             f1 = input_imgs[i]
+
             f2 = ref_imgs[i]
 
             test_array = np.load(INPUT_DIR + f1,encoding = 'latin1')
-
             reduced = ps4.reduce_image(test_array.copy())
 
             ref_reduced = np.load(INPUT_DIR + f2,encoding = 'latin1')
 
             correct = np.allclose(reduced, ref_reduced, atol=0.05)
-
             self.assertTrue(correct, "Output does not match the reference "
                                      "solution.")
 
     def test_expand(self):
+
         input_imgs = ['test_expand1_img.npy', 'test_expand2_img.npy',
                       'test_expand3_img.npy']
         ref_imgs = ['test_expand1_ref.npy', 'test_expand2_ref.npy',
@@ -110,11 +109,11 @@ class Part2(unittest.TestCase):
             ref_expanded = np.load(INPUT_DIR + f2,encoding = 'latin1')
 
             correct = np.allclose(expanded, ref_expanded, atol=0.05)
-
             self.assertTrue(correct, "Output does not match the reference "
                                      "solution.")
 
     def test_gaussian_pyramid(self):
+
         input_imgs = ['test_gauss1_pyr.npy', 'test_gauss2_pyr.npy',
                       'test_gauss3_pyr.npy']
         ref_imgs = ['test_gauss1_pyr_ref.npy', 'test_gauss2_pyr_ref.npy',
@@ -140,7 +139,10 @@ class Part2(unittest.TestCase):
 
                 self.assertTrue(correct, error_msg)
 
+
+
     def test_laplacian_pyramid(self):
+
         input_imgs = ['test_lapl1_pyr.npy', 'test_lapl2_pyr.npy',
                       'test_lapl3_pyr.npy']
         ref_imgs = ['test_lapl1_pyr_ref.npy', 'test_lapl2_pyr_ref.npy',
@@ -165,7 +167,6 @@ class Part2(unittest.TestCase):
                             "the autograder.\n".format(l)
 
                 self.assertTrue(correct, error_msg)
-
 
 class Part3(unittest.TestCase):
     @classmethod
@@ -205,7 +206,6 @@ class Part3(unittest.TestCase):
 
             center_box_average = np.mean(warped[r:3 * r, c:3 * c])
             correct_center_box = abs(center_box_average - box_value) <= 0.51
-
             error_msg = "Center box average pixel value is greater than the " \
                         "value used in the input image."
 
@@ -223,7 +223,7 @@ class Part3(unittest.TestCase):
 
             self.assertTrue(correct_warped_img, error_msg)
 
-
+'''
 class Part4(unittest.TestCase):
     @classmethod
     def setUpClass(self):

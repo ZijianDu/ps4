@@ -168,8 +168,10 @@ def reduce_image(image):
         numpy.array: output image with half the shape, same type as the
                      input image.
     """
-
-    raise NotImplementedError
+    # gaussian blur image first to avoid aliasing
+    img_blurred = cv2.GaussianBlur(image, ksize = (5,5), sigmaX = 1, sigmaY=1)
+    # subsample
+    return np.array(img_blurred)[::2, ::2]
 
 
 def gaussian_pyramid(image, levels):
@@ -192,8 +194,13 @@ def gaussian_pyramid(image, levels):
     Returns:
         list: Gaussian pyramid, list of numpy.arrays.
     """
-
-    raise NotImplementedError
+    gaussian_pyramid_list = []
+    gaussian_pyramid_list.append(image)
+    for i in range(levels - 1):
+        downsampled = reduce_image(image)
+        gaussian_pyramid_list.append(downsampled)
+        image = downsampled
+    return gaussian_pyramid_list
 
 
 def create_combined_img(img_list):
@@ -238,8 +245,7 @@ def expand_image(image):
         numpy.array: same type as 'image' with the doubled height and
                      width.
     """
-
-    raise NotImplementedError
+    return cv2.pyrUp(image, dstsize= (2*image.shape[1], 2*image.shape[0]))
 
 
 def laplacian_pyramid(g_pyr):
@@ -253,9 +259,15 @@ def laplacian_pyramid(g_pyr):
     Returns:
         list: Laplacian pyramid, with l_pyr[-1] = g_pyr[-1].
     """
-
-    raise NotImplementedError
-
+    l_pyr = []
+    for i in range(len(g_pyr)-1):
+        previous_gaussian = g_pyr[i]
+        next_gaussian = g_pyr[i + 1]
+        upsampled_next_gaussian = expand_image(next_gaussian)
+        laplacian_temp = previous_gaussian - upsampled_next_gaussian
+        l_pyr.append(laplacian_temp)
+    l_pyr.append(g_pyr[-1])
+    return l_pyr
 
 def warp(image, U, V, interpolation, border_mode):
     """Warps image using X and Y displacements (U and V).
@@ -280,9 +292,12 @@ def warp(image, U, V, interpolation, border_mode):
         numpy.array: warped image, such that
                      warped[y, x] = image[y + V[y, x], x + U[y, x]]
     """
-
-    raise NotImplementedError
-
+    # np.meshgrid: generate a 2D array of indices
+    M, N = image.shape
+    X, Y = np.meshgrid(range(N), range(M))
+    map_x = X + U
+    map_y = Y + V
+    return cv2.remap(image, map_x.astype(np.float32), map_y.astype(np.float32), borderMode=cv2.BORDER_REFLECT101, interpolation=cv2.INTER_CUBIC)
 
 def hierarchical_lk(img_a, img_b, levels, k_size, k_type, sigma, interpolation,
                     border_mode):
