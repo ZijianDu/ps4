@@ -82,11 +82,13 @@ class Part2(unittest.TestCase):
 
             f2 = ref_imgs[i]
 
-            test_array = np.load(INPUT_DIR + f1,encoding = 'latin1')
+            test_array = np.load(INPUT_DIR + f1, encoding = 'latin1')
             reduced = ps4.reduce_image(test_array.copy())
 
             ref_reduced = np.load(INPUT_DIR + f2,encoding = 'latin1')
-
+            print(test_array.shape)
+            print(reduced.shape)
+            print(ref_reduced.shape)
             correct = np.allclose(reduced, ref_reduced, atol=0.05)
             self.assertTrue(correct, "Output does not match the reference "
                                      "solution.")
@@ -269,7 +271,11 @@ class Part4(unittest.TestCase):
 
             max_diff = abs(d_c) * .1 +.21
             check_u = abs(u_mean - d_c) <= max_diff
-
+            print(u_mean)
+            print(d_c)
+            print(abs(u_mean - d_c))
+            print(max_diff)
+            print("XxXXXXXX")
             error_msg = "Average of U values in the area where there is " \
                         "movement is greater than the allowed amount."
 
@@ -280,7 +286,10 @@ class Part4(unittest.TestCase):
 
             max_diff = abs(d_r) * .1 + .21
             check_v = abs(v_mean - d_r) <= max_diff
-
+            print(v_mean)
+            print(d_r)
+            print(abs(v_mean - d_r))
+            print(max_diff)
             error_msg = "Average of V values in the area where there is " \
                         "movement is greater than the allowed amount."
 

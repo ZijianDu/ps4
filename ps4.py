@@ -171,7 +171,12 @@ def reduce_image(image):
     # gaussian blur image first to avoid aliasing
     img_blurred = cv2.GaussianBlur(image, ksize = (5,5), sigmaX = 1, sigmaY=1)
     # subsample
-    return np.array(img_blurred)[::2, ::2]
+    result = np.array(img_blurred)[::2, ::2]
+    #if result.shape[0] % 2 == 1:
+        #result = result[:-1, :-1]
+    #    result = np.pad(result, ((0,1),(0,1)), 'reflect')
+    return result
+
 
 
 def gaussian_pyramid(image, levels):
@@ -221,8 +226,23 @@ def create_combined_img(img_list):
         numpy.array: output image with the pyramid images stacked
                      from left to right.
     """
+    output_h = img_list[0].shape[0]
+    output_w = 0
+    for i in range(len(img_list)):
+        output_w += img_list[i].shape[1]
+    # declare output image
+    output_img = np.zeros((output_h, output_w))
+    for i in range(len(img_list)):
+        x1 = 0
+        x2 = img_list[i].shape[0]
+        y1 = 0
+        for j in range(i):
+            y1 += img_list[j].shape[1]
+        y2 = y1 + img_list[i].shape[1]
+        output_img[x1:x2, y1:y2] = normalize_and_scale(img_list[i])
+    return output_img
 
-    raise NotImplementedError
+
 
 
 def expand_image(image):
@@ -264,7 +284,7 @@ def laplacian_pyramid(g_pyr):
         previous_gaussian = g_pyr[i]
         next_gaussian = g_pyr[i + 1]
         upsampled_next_gaussian = expand_image(next_gaussian)
-        laplacian_temp = previous_gaussian - upsampled_next_gaussian
+        laplacian_temp = previous_gaussian - upsampled_next_gaussian[: previous_gaussian.shape[0], : previous_gaussian.shape[1]]
         l_pyr.append(laplacian_temp)
     l_pyr.append(g_pyr[-1])
     return l_pyr
@@ -299,6 +319,8 @@ def warp(image, U, V, interpolation, border_mode):
     map_y = Y + V
     return cv2.remap(image, map_x.astype(np.float32), map_y.astype(np.float32), borderMode=cv2.BORDER_REFLECT101, interpolation=cv2.INTER_CUBIC)
 
+
+# needs further work!
 def hierarchical_lk(img_a, img_b, levels, k_size, k_type, sigma, interpolation,
                     border_mode):
     """Computes the optic flow using Hierarchical Lucas-Kanade.
@@ -327,4 +349,43 @@ def hierarchical_lk(img_a, img_b, levels, k_size, k_type, sigma, interpolation,
                              same size and type as U.
     """
 
-    raise NotImplementedError
+    ## simple description of the algo: starting from the lowest level up
+    ## 0. obtain image gaussian multiscale
+    ## 1. calculate motion field map from image IL and image JL
+    ## 2. upsample motion field by 2
+    ## 3. do a warping using image I at L-1 level and the upsampled motion field to generate image wrappedL-1
+    ## 4. calculate motion field map between image wrappedL-1 and JL-1
+    ## repeat
+
+    ## obtain subsampled images needed at each levels
+    subsampled_imageI = []
+    subsampled_imageJ = []
+    temp_image_I = img_a.copy()
+    temp_image_J = img_b.copy()
+    subsampled_imageI.append(temp_image_I)
+    subsampled_imageJ.append(temp_image_J)
+    for level in range(levels - 1):
+        temp_image_I = reduce_image(temp_image_I)
+        subsampled_imageI.append(temp_image_I)
+        temp_image_J = reduce_image(temp_image_J)
+        subsampled_imageJ.append(temp_image_J)
+    # main multiscale LK algo
+    temp_U, temp_V = optic_flow_lk(subsampled_imageI[-1], subsampled_imageJ[-1], k_size, k_type, sigma)
+    for level in range(1, levels - 1):
+        temp_U = expand_image(temp_U)
+        temp_V = expand_image(temp_V)
+        temp_U = temp_U[: subsampled_imageI[-level-1].shape[0], : subsampled_imageI[-level-1].shape[1]]
+        temp_V = temp_V[: subsampled_imageI[-level-1].shape[0], : subsampled_imageI[-level-1].shape[1]]
+        temp_warpped = warp(subsampled_imageI[-level-1], temp_U, temp_V,
+                            interpolation = interpolation, border_mode = border_mode)
+        temp_U, temp_V = optic_flow_lk(temp_warpped, subsampled_imageJ[-level-1], k_size, k_type, sigma)
+    # level zero
+    temp_U = expand_image(temp_U)
+    temp_V = expand_image(temp_V)
+    return (temp_U, temp_V)
+
+
+
+
+
+
